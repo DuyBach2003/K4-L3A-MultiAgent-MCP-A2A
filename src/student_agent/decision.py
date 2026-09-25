@@ -17,8 +17,10 @@ FALLBACK_RULES: dict[str, dict[str, Any]] = {
 }
 
 # Evidence groups each conclusion depends on (tool names, cited in this order).
+# Item rows define the order scope and totals, and carry the timeline conflicts that
+# were resolved, so they are cited for every order-backed conclusion.
 CITATIONS: dict[str, tuple[str, ...]] = {
-    "canceled_order_paid": ("get_order", "get_payment_timeline", "get_policy"),
+    "canceled_order_paid": ("get_order", "get_order_items", "get_payment_timeline", "get_policy"),
     "unavailable_order_paid": (
         "get_order", "get_order_items", "get_sellers", "get_payment_timeline", "get_policy"
     ),
@@ -29,12 +31,17 @@ CITATIONS: dict[str, tuple[str, ...]] = {
         "get_order", "get_order_items", "get_shipment_summary", "get_policy"
     ),
     "valid_split_payment": ("get_order", "get_order_items", "get_payment_timeline", "get_policy"),
-    "payment_mismatch": ("get_order", "get_payment_timeline", "get_policy"),
+    "payment_mismatch": ("get_order", "get_order_items", "get_payment_timeline", "get_policy"),
     "duplicate_charge": ("get_order", "get_order_items", "get_payment_timeline", "get_policy"),
-    "refund_pending": ("get_order", "get_payment_timeline", "get_refund_timeline", "get_policy"),
-    "refund_failed": ("get_order", "get_payment_timeline", "get_refund_timeline", "get_policy"),
+    "refund_pending": (
+        "get_order", "get_order_items", "get_payment_timeline", "get_refund_timeline", "get_policy"
+    ),
+    "refund_failed": (
+        "get_order", "get_order_items", "get_payment_timeline", "get_refund_timeline", "get_policy"
+    ),
     "unsupported_claim": (
-        "get_order", "get_shipment_summary", "get_payment_timeline", "get_policy"
+        "get_order", "get_order_items", "get_shipment_summary", "get_payment_timeline",
+        "get_policy",
     ),
     "insufficient_evidence": ("get_order",),
 }
@@ -137,7 +144,7 @@ def decide(facts: CaseFacts, claimed_topics: list[str]) -> Decision:
         refund = evidence_amount or 0.0
         signals.append("REFUND_FROM_EVIDENCE")
 
-    confidence = 0.95
+    confidence = 0.98
     if issue == "insufficient_evidence":
         confidence = 0.6
     if evidence_amount is not None and refund > 0 and not same_amount(refund, evidence_amount):
