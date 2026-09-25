@@ -1,0 +1,21 @@
+{
+  "competition_id": "day09-multiagent-mcp-a2a",
+  "variant_id": "l3a",
+  "model": {
+    "name": "none",
+    "type": "rule-based",
+    "llm_used": false,
+    "parameters": 0,
+    "provider": null,
+    "note": "Deterministic Python rules over MCP evidence; no language model is called."
+  },
+  "agents": [
+    "coordinator",
+    "order-agent",
+    "payment-agent",
+    "shipment-agent",
+    "policy-agent",
+    "verifier"
+  ],
+  "entrypoint": "src/student_agent/workflow.py:solve_case"
+}
